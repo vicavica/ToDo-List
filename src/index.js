@@ -21,7 +21,7 @@ export default class App extends React.Component {
         ],
         searchTarget: '',
         todoInputValue: '',
-        myFilter: 'In Progress', //All, In Progress, Done
+        filter: 'All', //All, In Progress, Done
     };
 
     createTodoItem(label) {
@@ -107,29 +107,39 @@ export default class App extends React.Component {
         }))
     };
 
-    myFilter(items, myFilter) {
-        switch(myFilter) {
+    filter = (items, filter) => {
+        switch(filter) {
             case 'All':
                 return items;
             case 'In Progress':
-                return items.filter((item) => !item.done);
+                return items.filter((el) => !el.done);
             case 'Done':
-                return items.filter((item) => item.done);
+                return items.filter((el) => el.done);
             default:
                 return items;
         }
 
     };
 
-    render () {
-        const { data, searchTarget, todoInputValue } = this.state;
+    onFilterChange = (filter) => {
+        this.setState( (prevState) => ({
+            filter: filter,
+        }))
+    };
 
-        const filteredContacts = data.filter(el => {                    //search realization
+    render () {
+        const { data, searchTarget, todoInputValue, filter } = this.state;
+
+        const filteredContacts = this.filter(data.filter(el => {                    //search realization
             const dataElToLowerCase = el.label.toLowerCase();
             const searchValueToLowerCase = searchTarget.toLowerCase();
 
            return dataElToLowerCase.includes(searchValueToLowerCase);
-        });
+        }), filter);
+
+        console.log(filteredContacts);
+
+
 
         const doneItems = data.filter((el) => el.done).length;          // counter realization for <h2>
         const todoItems = data.length - doneItems;
@@ -143,7 +153,7 @@ export default class App extends React.Component {
                     onInputTextChange = {this.onAddItemInputChange}
                     value={todoInputValue}
                 />
-                <TodoList todo = {searchTarget.length ? filteredContacts : data}
+                <TodoList todo = {filteredContacts}
                           onDelete = {this.deleteItem}
                           onMarkImportant = {this.onMarkImportant}
                           onMarkDone = {this.onMarkDone}/>
@@ -152,7 +162,8 @@ export default class App extends React.Component {
                         onInputTextChange={this.onInputTextChange}
                         value={searchTarget}
                     />
-                    <ElFilterStatus/>
+                    <ElFilterStatus filter={this.state.filter}
+                                    onFilterChange = {this.onFilterChange} />
                 </div>
 
             </div>
